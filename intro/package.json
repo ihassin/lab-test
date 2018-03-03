@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "test": "lab -cLv -t 100",
+    "start": "node ./index"
+  },
+  "dependencies": {
+    "hapi": "^13.0.0",
+    "joi": "^8.0.2"
+  },
+  "devDependencies": {
+    "code": "^2.1.0",
+    "lab": "^9.0.0"
+  }
+}
