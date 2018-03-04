@@ -1,56 +1,40 @@
 'use strict';
-// Hapi framework
-const Hapi = require('hapi');
-// our plugin in the file api.js
-const ApiPlugin = require('../api');
-
-// assertion library
-const Code = require('code');
-// Lab test runner
-const Lab = require('lab');
-// instance of our test suite
-const lab = exports.lab = Lab.script();
-
-// let's get a server instance
-const getServer = function () {
-// We create a server object
-    const server = new Hapi.Server();
-// Server will listen on port 8080
-    server.connection();
-
-// register the plugin
-    return server.register(ApiPlugin)
-        .then(() => server);
-};
-
-var log4js = require('log4js');
+const hapi = require('hapi');
+const apiPlugin = require('../api');
+const log4js = require('log4js');
 log4js.configure({
   appenders: { unit: { type: 'file', filename: 'unit.log' } },
-  categories: { default: { appenders: ['unit'], level: 'error' } }
+  categories: { default: { appenders: ['unit'], level: 'trace' } }
 });
+
+const code = require('code');
+const lab = require('lab');
+const labExport = exports.lab = lab.script();
 
 var logger = log4js.getLogger('unit');
 
-logger.level = 'trace';
-logger.trace('Entering cheese testing');
-logger.debug('Got cheese.');
-logger.info('Cheese is Gouda.');
-logger.warn('Cheese is quite smelly.');
-logger.error('Cheese is too ripe!');
-logger.fatal('Cheese was breeding ground for listeria.');
+// let's get a server instance
+const getServer = function () {
+    const server = new hapi.Server();
+    server.connection();
 
-lab.test('Ensure that the server exists', (done) => {
+    return server.register(apiPlugin)
+        .then(() => server);
+};
+
+labExport.test('Ensure that the server exists', (done) => {
 
     getServer()
         .then((server) => {
 
-            Code.expect(server).to.exist();
+            code.expect(server).to.exist();
+            logger.trace('Server exists');
             done();
         })
         .catch(done);
 });
 
-lab.test('Simply test the unique route', (done) => {
+labExport.test('Simply test the unique route', (done) => {
 
     // What we will inject into the server
     const toInject = {
@@ -66,24 +50,25 @@ lab.test('Simply test the unique route', (done) => {
         .then((response) => {
 
             // we did not specified any other status-code, so 200 is th default one
-            Code.expect(response.statusCode).to.equal(200);
+            code.expect(response.statusCode).to.equal(200);
+            logger.trace('200 OK');
             // We parse the payload as a JSON object
             const payload = JSON.parse(response.payload);
             // payload exists
-            Code.expect(payload).to.exist();
+            code.expect(payload).to.exist();
             // it has the fields named: 'alive', 'item' and 'parameter'
-            Code.expect(payload).to.contain(['alive', 'item', 'parameter']);
+            code.expect(payload).to.contain(['alive', 'item', 'parameter']);
 
             // The values of each field is the one we expect
-            Code.expect(payload.alive).to.be.true();
-            Code.expect(payload.item).to.equal(10);
-            Code.expect(payload.parameter).to.equal('hello');
+            code.expect(payload.alive).to.be.true();
+            code.expect(payload.item).to.equal(10);
+            code.expect(payload.parameter).to.equal('hello');
             done();
         })
         .catch(done);
 });
 
-lab.test('Simple example of a bad request', (done) => {
+labExport.test('Simple example of a bad request', (done) => {
 
     // What we will inject into the server
     const toInject = {
@@ -99,7 +84,7 @@ lab.test('Simple example of a bad request', (done) => {
         .then((response) => {
 
             // we issued a bad request, the proper response status-code is 400 then
-            Code.expect(response.statusCode).to.equal(400);
+            code.expect(response.statusCode).to.equal(400);
             /**
              * response.payload is
              * {
