@@ -23,6 +23,22 @@ const getServer = function () {
         .then(() => server);
 };
 
+var log4js = require('log4js');
+log4js.configure({
+  appenders: { unit: { type: 'file', filename: 'unit.log' } },
+  categories: { default: { appenders: ['unit'], level: 'error' } }
+});
+
+var logger = log4js.getLogger('unit');
+
+logger.level = 'trace';
+logger.trace('Entering cheese testing');
+logger.debug('Got cheese.');
+logger.info('Cheese is Gouda.');
+logger.warn('Cheese is quite smelly.');
+logger.error('Cheese is too ripe!');
+logger.fatal('Cheese was breeding ground for listeria.');
+
 lab.test('Ensure that the server exists', (done) => {
 
     getServer()
